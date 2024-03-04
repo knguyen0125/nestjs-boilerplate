@@ -41,6 +41,9 @@ export default defineConfig({
     'postgresql://postgres:postgres@localhost:5432/nest',
   entities: ['dist/**/*.entity.js'],
   entitiesTs: ['src/**/*.entity.ts'],
+  discovery: {
+    warnWhenNoEntities: false,
+  },
   extensions: [Migrator, SeedManager],
   migrations: {
     path: path.join(__dirname, './migrations'),

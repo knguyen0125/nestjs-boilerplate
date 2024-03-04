@@ -2,17 +2,18 @@ version: '3'
 
 # Docker-compose for NestJS App, Redis, Postgres and RabbitMQ
 services:
-  nestjs:
+  nestjs: &nestjs
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "3000:3000"
-    environment:
-      - NODE_ENV=development
-      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/nestjs
-      - REDIS_URL=redis://redis:6379
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672
+    environment: &nestjs-env
+      NODE_ENV: development
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/nestjs
+      REDIS_URL: redis://redis:6379
+      RABBITMQ_URL: amqp://guest:guest@rabbitmq:5672
+      WORKER_MODE: 'false'
     depends_on:
       - postgres
       - redis
@@ -22,6 +23,13 @@ services:
     restart: unless-stopped
     volumes:
       - .:/app
+
+  worker:
+    <<: *nestjs
+    ports: []
+    environment:
+      <<: *nestjs-env
+      WORKER_MODE: 'true'
 
   postgres:
     image: public.ecr.aws/docker/library/postgres:16.2
