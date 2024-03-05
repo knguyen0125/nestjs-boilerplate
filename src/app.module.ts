@@ -10,11 +10,14 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 
 @Module({
   imports: [
+    // Configuration for the MikroORM module in mikro-orm.config.ts
     MikroOrmModule.forRoot(),
     RedisModule.forRoot({
       type: 'single',
       url: process.env.REDIS_URL,
       options: {
+        // Fail fast if the Redis server is down
+        enableOfflineQueue: false,
         // Prevent the app from hanging indefinitely if the Redis server is down
         commandTimeout: parseInt(process.env.REDIS_COMMAND_TIMEOUT) || 5000,
         connectTimeout: parseInt(process.env.REDIS_CONNECT_TIMEOUT) || 5000,
