@@ -1,49 +1,42 @@
-## Description
+# NestJS Full-Stack Boilerplate
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This is an opinionated NestJS boilerplate
 
-## Installation
+## External Dependencies
 
-```bash
-$ npm install
-```
+External dependencies:
 
-## Running the app
+* [x] Postgres
+* [x] Redis
+* [x] RabbitMQ
 
-```bash
-# development
-$ npm run start
+## Development niceties
 
-# watch mode
-$ npm run start:dev
+* [x] Docker & Docker-compose
+* [ ] Schematic for generating model CRUD
 
-# production mode
-$ npm run start:prod
-```
+## Features
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+* [x] Health check
+  * [x] Server Health Check
+  * [x] Database Health Check
+  * [x] RabbitMQ Health Check
+  * [x] Redis Health Check
+* [ ] Authentication
+  * [ ] Username / Password
+  * [ ] Multi-Factor Authentication
+* [ ] Authorization
+  * [ ] ABAC (?) / RBAC (?)
+* [ ] Payment
+  * [ ] Stripe Integration
+* [ ] Notification
+  * [ ] User notification preferences
+  * [ ] Email (SMTP)
+    * [ ] Email Template (MJML - ?)
+  * [ ] SMS (Twilio)
+  * [ ] Push Notification (Firebase)
+* [x] Queuing
+    * [x] Workers
+* [ ] i18n
+* [ ] Admin interface
+* [ ] Testing
