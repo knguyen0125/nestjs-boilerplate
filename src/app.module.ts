@@ -1,12 +1,11 @@
 import { Module, RequestMethod } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { LoggerModule } from 'nestjs-pino';
 import { v4 } from 'uuid';
 import { MikroOrmModule } from '@mikro-orm/nestjs';
-import { HealthModule } from './health/health.module';
+import { HealthModule } from '@/health/health.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
+import { NotificationModule } from '@/notification';
 
 @Module({
   imports: [
@@ -58,8 +57,7 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
       ],
     }),
     HealthModule,
+    NotificationModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

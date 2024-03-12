@@ -24,6 +24,7 @@ External dependencies:
   * [x] Redis Health Check
 * [ ] Authentication
   * [ ] Username / Password
+    * [ ] Multiple hashing algorithm?
   * [ ] Multi-Factor Authentication
 * [ ] Authorization
   * [ ] ABAC (?) / RBAC (?)
