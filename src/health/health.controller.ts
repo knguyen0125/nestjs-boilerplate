@@ -2,7 +2,7 @@ import { Controller, Get } from '@nestjs/common';
 import {
   HealthCheck,
   HealthCheckService,
-  MikroOrmHealthIndicator,
+  SequelizeHealthIndicator,
 } from '@nestjs/terminus';
 import { ApiExcludeController } from '@nestjs/swagger';
 import { RedisHealthIndicator } from './redis-health.indicator';
@@ -13,7 +13,7 @@ import { RabbitmqHealthIndicator } from './rabbitmq-health.indicator';
 export class HealthController {
   constructor(
     private health: HealthCheckService,
-    private mikro: MikroOrmHealthIndicator,
+    private db: SequelizeHealthIndicator,
     private redis: RedisHealthIndicator,
     private rabbitmq: RabbitmqHealthIndicator,
   ) {}
@@ -22,7 +22,7 @@ export class HealthController {
   @HealthCheck()
   check() {
     return this.health.check([
-      () => this.mikro.pingCheck('database'),
+      () => this.db.pingCheck('database'),
       () => this.redis.isHealthy('redis'),
       () => this.rabbitmq.isHealthy('rabbitmq'),
     ]);
