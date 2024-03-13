@@ -48,6 +48,9 @@ import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
       sync: {
         force: true,
       },
+      define: {
+        underscored: true,
+      },
     }),
     RedisModule.forRoot({
       type: 'single',

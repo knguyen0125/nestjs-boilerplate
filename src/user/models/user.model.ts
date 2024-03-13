@@ -1,15 +1,15 @@
-import {
-  Table,
-  Model,
-  Column,
-  BeforeSave,
-  IsEmail,
-  NotNull,
-} from 'sequelize-typescript';
+import { Table, Model, Column, BeforeSave } from 'sequelize-typescript';
 import * as bcrypt from 'bcrypt';
+import { v4 } from 'uuid';
 
 @Table
 export class User extends Model {
+  @Column({
+    primaryKey: true,
+    defaultValue: () => v4(),
+  })
+  override id: string;
+
   @Column({
     allowNull: false,
     unique: true,
@@ -34,8 +34,10 @@ export class User extends Model {
   @Column
   lastName: string;
 
-  @Column({ defaultValue: true })
-  isActive: boolean;
+  @Column({
+    defaultValue: false,
+  })
+  emailVerified: boolean;
 
   @BeforeSave
   static async hashPassword(instance: User) {
@@ -45,8 +47,8 @@ export class User extends Model {
     }
   }
 
-  toJSON() {
-    // Omit the password when returning a user
+  override toJSON() {
+    // Omit the password when serializing to JSON
     const values = Object.assign({}, this.get());
     delete values.password;
     return values;
