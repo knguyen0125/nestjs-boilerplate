@@ -7,6 +7,8 @@ import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
 import { NotificationModule } from '@/notification';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UserModule } from './user/user.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
 
 @Module({
   imports: [
@@ -20,7 +22,7 @@ import { UserModule } from './user/user.module';
                 port: parseInt(process.env.DB_PORT),
                 username: process.env.DB_USERNAME,
                 password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME,
+                database: process.env.DB_DATABASE,
               },
             ]
           : [
@@ -29,7 +31,7 @@ import { UserModule } from './user/user.module';
                 port: parseInt(process.env.DB_PORT),
                 username: process.env.DB_USERNAME,
                 password: process.env.DB_PASSWORD,
-                database: process.env.DB_NAME,
+                database: process.env.DB_DATABASE,
               },
             ],
         write: {
@@ -37,12 +39,15 @@ import { UserModule } from './user/user.module';
           port: parseInt(process.env.DB_PORT),
           username: process.env.DB_USERNAME,
           password: process.env.DB_PASSWORD,
-          database: process.env.DB_NAME,
+          database: process.env.DB_DATABASE,
         },
       },
       autoLoadModels: true,
       // DO NOT use synchronize in production - otherwise you risk data loss
-      synchronize: false,
+      synchronize: true,
+      sync: {
+        force: true,
+      },
     }),
     RedisModule.forRoot({
       type: 'single',
@@ -88,6 +93,12 @@ import { UserModule } from './user/user.module';
     HealthModule,
     NotificationModule,
     UserModule,
+  ],
+  providers: [
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: SequelizeErrorInterceptor,
+    },
   ],
 })
 export class AppModule {}
