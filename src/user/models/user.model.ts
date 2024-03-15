@@ -1,6 +1,6 @@
 import { Table, Model, Column, BeforeSave } from 'sequelize-typescript';
-import * as bcrypt from 'bcrypt';
 import { v4 } from 'uuid';
+import * as passwordUtils from '@/user/utils/password';
 
 @Table
 export class User extends Model {
@@ -42,8 +42,7 @@ export class User extends Model {
   @BeforeSave
   static async hashPassword(instance: User) {
     if (instance.changed('password')) {
-      const hash = await bcrypt.hash(instance.password, 10);
-      instance.password = `{bcrypt}${hash}`;
+      instance.password = await passwordUtils.hash(instance.password);
     }
   }
 
