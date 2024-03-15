@@ -1,14 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger } from 'nestjs-pino';
-import { VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
     rawBody: true,
   });
+
+  app.use(cookieParser());
 
   // Setup Pino Logger
   app.useLogger(app.get(Logger));
@@ -17,6 +20,9 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
+
+  // Ensure that all incoming requests are validated
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
 
   // Enable Graceful Shutdown
   app.enableShutdownHooks();
