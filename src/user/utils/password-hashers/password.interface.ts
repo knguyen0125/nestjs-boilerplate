@@ -14,28 +14,16 @@ export interface IPasswordHasher {
   hardenRuntime: (plaintext: string, hash: string) => Promise<void>;
 }
 
-export class BasePasswordHasher implements IPasswordHasher {
-  id = 'base';
+export abstract class BasePasswordHasher implements IPasswordHasher {
+  abstract id: string;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async hash(plaintext: string): Promise<string> {
-    throw new Error('Not implemented');
-  }
+  abstract hash(plaintext: string): Promise<string>;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async compare(plaintext: string, hash: string): Promise<boolean> {
-    throw new Error('Not implemented');
-  }
+  abstract compare(plaintext: string, hash: string): Promise<boolean>;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async needsUpgrade(hash: string): Promise<boolean> {
-    throw new Error('Not implemented');
-  }
+  abstract needsUpgrade(hash: string): Promise<boolean>;
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async hardenRuntime(plaintext: string, hash: string) {
-    // Do nothing by default
-  }
+  abstract hardenRuntime(plaintext: string, hash: string): Promise<void>;
 
   async compareAndUpgrade(plaintext: string, hash: string) {
     const isValid = await this.compare(plaintext, hash);

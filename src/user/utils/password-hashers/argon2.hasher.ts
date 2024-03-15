@@ -36,4 +36,10 @@ export class Argon2Hasher
   override async needsUpgrade(hash: string) {
     return argon2.needsRehash(hash, this.options);
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  hardenRuntime(plaintext: string, hash: string): Promise<void> {
+    // Do nothing by default
+    return;
+  }
 }
