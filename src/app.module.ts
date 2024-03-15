@@ -1,6 +1,5 @@
 import { Module, RequestMethod } from '@nestjs/common';
 import { LoggerModule, PinoLogger } from 'nestjs-pino';
-import { v4 } from 'uuid';
 import { HealthModule } from '@/health/health.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
@@ -9,14 +8,12 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { UserModule } from './user/user.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
-import { pinoLogger } from '@/utils/pino';
+import { logger, pinoHttp } from '@/utils/logger';
 
 @Module({
   imports: [
     SequelizeModule.forRootAsync({
-      imports: [LoggerModule],
-      inject: [PinoLogger],
-      useFactory: (pinoLogger: PinoLogger) => ({
+      useFactory: () => ({
         dialect: 'postgres',
         replication: {
           read: process.env.DB_READ_REPLICA_HOST
@@ -55,7 +52,7 @@ import { pinoLogger } from '@/utils/pino';
         define: {
           underscored: true,
         },
-        logging: (msg) => pinoLogger.debug(msg),
+        logging: (msg) => logger.debug(msg),
       }),
     }),
     RedisModule.forRoot({
@@ -76,22 +73,14 @@ import { pinoLogger } from '@/utils/pino';
         // Create a default topic exchange
         { name: 'default', type: 'topic' },
       ],
+
       uri: process.env.RABBITMQ_URL,
       connectionInitOptions: { wait: false },
       // Only register handlers in worker mode
       registerHandlers: process.env.WORKER_MODE === 'true',
     }),
     LoggerModule.forRoot({
-      pinoHttp: {
-        logger: pinoLogger,
-        genReqId: function (req, res) {
-          const existingID = req.id ?? req.headers['x-request-id'];
-          if (existingID) return existingID;
-          const id = v4();
-          res.setHeader('X-Request-Id', id);
-          return id;
-        },
-      },
+      pinoHttp,
       exclude: [
         // Ignore health check requests
         { method: RequestMethod.ALL, path: 'health' },

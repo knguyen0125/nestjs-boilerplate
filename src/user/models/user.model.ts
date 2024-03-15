@@ -1,7 +1,7 @@
 import { Table, Model, Column, BeforeSave, Index } from 'sequelize-typescript';
 import { v4 } from 'uuid';
 import { defaultHasher } from '@/user/utils/password-hashers';
-import { pinoLogger } from '@/utils/pino';
+import { logger } from '@/utils/logger';
 
 @Table
 export class User extends Model {
@@ -79,10 +79,16 @@ export class User extends Model {
     const { isVerified, mustUpgrade } = await this.verifyPassword(plaintext);
 
     if (isVerified && mustUpgrade) {
-      pinoLogger.info(`Upgrading the password hash for user ${this.email}`);
+      logger.log(`Upgrading the password hash for user ${this.email}`);
       this.password = plaintext;
       await this.save();
     }
+
+    logger.log({
+      msg: 'Password check attempt - inside model',
+      email: this.email,
+      isVerified,
+    });
 
     return isVerified;
   }

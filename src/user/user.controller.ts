@@ -5,6 +5,7 @@ import {
   HttpCode,
   Post,
   UnauthorizedException,
+  Logger,
 } from '@nestjs/common';
 import { User } from '@/user/models/user.model';
 import { InjectModel } from '@nestjs/sequelize';
@@ -21,6 +22,8 @@ class UserDto {
 
 @Controller('users')
 export class UserController {
+  logger = new Logger(UserController.name);
+
   constructor(
     @InjectModel(User)
     private readonly userModel: typeof User,
@@ -39,6 +42,7 @@ export class UserController {
   @HttpCode(200)
   @Post('login')
   async login(@Body() payload: UserDto) {
+    this.logger.log(`Login attempt for ${payload.email} - inside controller`);
     const user = await this.userModel.findOne({
       where: {
         email: {
