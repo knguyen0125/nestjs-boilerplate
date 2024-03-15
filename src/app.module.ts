@@ -1,3 +1,4 @@
+import pino from 'pino';
 import { Module, RequestMethod } from '@nestjs/common';
 import { LoggerModule, PinoLogger } from 'nestjs-pino';
 import { v4 } from 'uuid';
@@ -82,6 +83,11 @@ import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
+        // Enable asynchronus logging
+        stream: pino.destination({
+          minLength: 4096,
+          sync: false,
+        }),
         genReqId: function (req, res) {
           const existingID = req.id ?? req.headers['x-request-id'];
           if (existingID) return existingID;
@@ -95,6 +101,7 @@ import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
         formatters: {
           level: (label) => ({ level: label }),
         },
+        timestamp: pino.stdTimeFunctions.isoTime,
       },
       exclude: [
         // Ignore health check requests
