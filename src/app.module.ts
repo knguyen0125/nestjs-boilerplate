@@ -1,4 +1,3 @@
-import pino from 'pino';
 import { Module, RequestMethod } from '@nestjs/common';
 import { LoggerModule, PinoLogger } from 'nestjs-pino';
 import { v4 } from 'uuid';
@@ -10,6 +9,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { UserModule } from './user/user.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
+import { pinoLogger } from '@/utils/pino';
 
 @Module({
   imports: [
@@ -50,7 +50,7 @@ import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
         // DO NOT use synchronize in production - otherwise you risk data loss
         synchronize: true,
         sync: {
-          force: true,
+          // force: true,
         },
         define: {
           underscored: true,
@@ -83,12 +83,7 @@ import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
     }),
     LoggerModule.forRoot({
       pinoHttp: {
-        // Enable asynchronus logging
-        stream: pino.destination({
-          minLength: 4096,
-          sync: false,
-        }),
-        level: process.env.LOG_LEVEL || 'info',
+        logger: pinoLogger,
         genReqId: function (req, res) {
           const existingID = req.id ?? req.headers['x-request-id'];
           if (existingID) return existingID;
@@ -96,13 +91,6 @@ import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
           res.setHeader('X-Request-Id', id);
           return id;
         },
-        redact: {
-          paths: ['req.headers.authorization', 'req.headers.cookie'],
-        },
-        formatters: {
-          level: (label) => ({ level: label }),
-        },
-        timestamp: pino.stdTimeFunctions.isoTime,
       },
       exclude: [
         // Ignore health check requests

@@ -1,6 +1,7 @@
 import { Table, Model, Column, BeforeSave } from 'sequelize-typescript';
 import { v4 } from 'uuid';
 import { defaultHasher } from '@/user/utils/password-hashers';
+import { pinoLogger } from '@/utils/pino';
 
 @Table
 export class User extends Model {
@@ -40,15 +41,49 @@ export class User extends Model {
   emailVerified: boolean;
 
   @BeforeSave
-  static async hashPassword(instance: User) {
-    if (instance.changed('password')) {
-      // OWASP recommendation
-      if (instance.password.length > 64 || instance.password.length < 8) {
-        throw new Error('Password must be between 8 and 64 characters long');
-      }
+  static async encodePassword(instance: User) {
+    if (instance.changed('email')) {
+      instance.email = instance.email.toLowerCase();
+    }
 
+    if (instance.changed('password')) {
       instance.password = await defaultHasher.encode(instance.password);
     }
+  }
+
+  /**
+   * Verify the password. This function do not upgrade the hash.
+   *
+   * @param plaintext
+   */
+  private async verifyPassword(plaintext: string) {
+    const isVerified = await defaultHasher.verify(plaintext, this.password);
+    const mustUpgrade = await defaultHasher.needsUpgrade(this.password);
+
+    // In case the hash is not verified, but the stored hash is outdated, we need to harden
+    // the runtime to reduce risk of timing attack
+    if (!isVerified && mustUpgrade) {
+      await defaultHasher.hardenRuntime(plaintext, this.password);
+    }
+
+    return { isVerified, mustUpgrade };
+  }
+
+  /**
+   * Check the password. This function will upgrade the hash if needed.
+   *
+   * @param plaintext
+   */
+  async checkPassword(plaintext: string) {
+    const { isVerified, mustUpgrade } = await this.verifyPassword(plaintext);
+
+    if (isVerified && mustUpgrade) {
+      pinoLogger.info(`Upgrading the password hash for user ${this.email}`);
+      this.password = plaintext;
+      await this.save();
+    }
+
+    return isVerified;
   }
 
   override toJSON() {
