@@ -11,6 +11,7 @@ export interface IPasswordHasher {
     needsUpgrade: boolean;
     hash: string;
   }>;
+  hardenRuntime: (plaintext: string, hash: string) => Promise<void>;
 }
 
 export class BasePasswordHasher implements IPasswordHasher {
@@ -29,6 +30,11 @@ export class BasePasswordHasher implements IPasswordHasher {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async needsUpgrade(hash: string): Promise<boolean> {
     throw new Error('Not implemented');
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async hardenRuntime(plaintext: string, hash: string) {
+    // Do nothing by default
   }
 
   async compareAndUpgrade(plaintext: string, hash: string) {

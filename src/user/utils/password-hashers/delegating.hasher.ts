@@ -43,4 +43,16 @@ export class DelegatingHasher
 
     return isNotFirst || needsUpgrade;
   }
+
+  override async hardenRuntime(plaintext: string, hash: string) {
+    const hasher = this.enabledHashers.find((h) =>
+      hash.startsWith(`{${h.id}}`),
+    );
+
+    if (!hasher) {
+      throw new Error('Unknown hasher');
+    }
+
+    return hasher.hardenRuntime(plaintext, hash.slice(`{${hasher.id}}`.length));
+  }
 }

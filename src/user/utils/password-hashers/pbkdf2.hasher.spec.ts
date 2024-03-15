@@ -1,5 +1,4 @@
 import { Pbkdf2Hasher } from './pbkdf2.hasher';
-import { BcryptHasher } from '@/user/utils/hashers/bcrypt.hasher';
 
 describe('#hash', () => {
   let hasher: Pbkdf2Hasher;

@@ -1,5 +1,8 @@
 import crypto from 'node:crypto';
+import { promisify } from 'util';
 import { BasePasswordHasher, IPasswordHasher } from './password.interface';
+
+const asyncPbkdf2 = promisify(crypto.pbkdf2);
 
 export class Pbkdf2Hasher
   extends BasePasswordHasher
@@ -83,56 +86,53 @@ export class Pbkdf2Hasher
     };
   }
 
-  override async hash(plaintext: string) {
-    return new Promise<string>((resolve, reject) => {
-      const salt = crypto.randomBytes(this.saltLength).toString('hex');
+  override async hash(
+    plaintext: string,
+    salt: string = crypto.randomBytes(this.saltLength).toString('hex'),
+    iterations: number = this.iterations,
+    keyLength: number = this.keyLength,
+    algorithm: string = this.algorithm,
+  ) {
+    const hash = await asyncPbkdf2(
+      plaintext,
+      salt,
+      iterations,
+      keyLength,
+      algorithm,
+    );
 
-      crypto.pbkdf2(
-        plaintext,
-        salt,
-        this.iterations,
-        this.keyLength,
-        'sha256',
-        (err, derivedKey) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(this.formatHash(salt, derivedKey));
-          }
-        },
-      );
-    });
+    return this.formatHash(salt, hash);
   }
 
   override async compare(plaintext: string, hash: string) {
-    return new Promise<boolean>((resolve, reject) => {
-      const { salt, keyLength, originalHash, iterations, algorithm } =
-        this.parseHash(hash);
+    const { salt, keyLength, originalHash, iterations, algorithm } =
+      this.parseHash(hash);
 
-      crypto.pbkdf2(
-        plaintext,
-        salt,
-        iterations,
-        keyLength,
-        algorithm,
-        (err, derivedKey) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(
-              crypto.timingSafeEqual(
-                Buffer.from(derivedKey.toString('hex')),
-                Buffer.from(originalHash),
-              ),
-            );
-          }
-        },
-      );
-    });
+    const derivedKey = await asyncPbkdf2(
+      plaintext,
+      salt,
+      iterations,
+      keyLength,
+      algorithm,
+    );
+
+    return crypto.timingSafeEqual(
+      Buffer.from(derivedKey.toString('hex')),
+      Buffer.from(originalHash),
+    );
   }
 
   override async needsUpgrade(hash: string) {
     const { iterations } = this.parseHash(hash);
     return iterations < this.iterations;
+  }
+
+  override async hardenRuntime(plaintext: string, hash: string) {
+    const { salt, iterations, keyLength, algorithm } = this.parseHash(hash);
+    const extraIterations = this.iterations - iterations;
+
+    if (extraIterations > 0) {
+      await this.hash(plaintext, salt, extraIterations, keyLength, algorithm);
+    }
   }
 }
