@@ -1,6 +1,6 @@
 import { Table, Model, Column, BeforeSave } from 'sequelize-typescript';
 import { v4 } from 'uuid';
-import * as passwordUtils from '@/user/utils/password';
+import { defaultHasher } from '@/user/utils/hashers';
 
 @Table
 export class User extends Model {
@@ -42,7 +42,12 @@ export class User extends Model {
   @BeforeSave
   static async hashPassword(instance: User) {
     if (instance.changed('password')) {
-      instance.password = await passwordUtils.hash(instance.password);
+      // OWASP recommendation
+      if (instance.password.length > 64 || instance.password.length < 8) {
+        throw new Error('Password must be between 8 and 64 characters long');
+      }
+
+      instance.password = await defaultHasher.hash(instance.password);
     }
   }
 
