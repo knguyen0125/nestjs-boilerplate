@@ -1,5 +1,5 @@
 import { Module, RequestMethod } from '@nestjs/common';
-import { LoggerModule, PinoLogger } from 'nestjs-pino';
+import { LoggerModule } from 'nestjs-pino';
 import { HealthModule } from '@/health/health.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
 import { RabbitMQModule } from '@golevelup/nestjs-rabbitmq';
