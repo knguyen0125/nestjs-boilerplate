@@ -2,7 +2,7 @@ version: '3'
 
 # Docker-compose for NestJS App, Redis, Postgres and RabbitMQ
 services:
-  nestjs: &nestjs
+  web: &nestjs
     build:
       context: .
       dockerfile: Dockerfile
@@ -31,6 +31,8 @@ services:
   worker:
     <<: *nestjs
     ports: []
+    deploy:
+      replicas: 1
     environment:
       <<: *nestjs-env
       WORKER_MODE: 'true'
@@ -38,6 +40,9 @@ services:
   scheduler:
     <<: *nestjs
     ports: []
+    deploy:
+      # Run only 1 instance of the scheduler
+      replicas: 1
     environment:
       <<: *nestjs-env
       WORKER_MODE: 'false'
