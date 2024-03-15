@@ -1,5 +1,5 @@
 import { Module, RequestMethod } from '@nestjs/common';
-import { LoggerModule } from 'nestjs-pino';
+import { LoggerModule, PinoLogger } from 'nestjs-pino';
 import { v4 } from 'uuid';
 import { HealthModule } from '@/health/health.module';
 import { RedisModule } from '@nestjs-modules/ioredis';
@@ -12,45 +12,50 @@ import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
 
 @Module({
   imports: [
-    SequelizeModule.forRoot({
-      dialect: 'postgres',
-      replication: {
-        read: process.env.DB_READ_REPLICA_HOST
-          ? [
-              {
-                host: process.env.DB_READ_REPLICA_HOST,
-                port: parseInt(process.env.DB_PORT),
-                username: process.env.DB_USERNAME,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_DATABASE,
-              },
-            ]
-          : [
-              {
-                host: process.env.DB_HOST,
-                port: parseInt(process.env.DB_PORT),
-                username: process.env.DB_USERNAME,
-                password: process.env.DB_PASSWORD,
-                database: process.env.DB_DATABASE,
-              },
-            ],
-        write: {
-          host: process.env.DB_HOST,
-          port: parseInt(process.env.DB_PORT),
-          username: process.env.DB_USERNAME,
-          password: process.env.DB_PASSWORD,
-          database: process.env.DB_DATABASE,
+    SequelizeModule.forRootAsync({
+      imports: [LoggerModule],
+      inject: [PinoLogger],
+      useFactory: (pinoLogger: PinoLogger) => ({
+        dialect: 'postgres',
+        replication: {
+          read: process.env.DB_READ_REPLICA_HOST
+            ? [
+                {
+                  host: process.env.DB_READ_REPLICA_HOST,
+                  port: parseInt(process.env.DB_PORT),
+                  username: process.env.DB_USERNAME,
+                  password: process.env.DB_PASSWORD,
+                  database: process.env.DB_DATABASE,
+                },
+              ]
+            : [
+                {
+                  host: process.env.DB_HOST,
+                  port: parseInt(process.env.DB_PORT),
+                  username: process.env.DB_USERNAME,
+                  password: process.env.DB_PASSWORD,
+                  database: process.env.DB_DATABASE,
+                },
+              ],
+          write: {
+            host: process.env.DB_HOST,
+            port: parseInt(process.env.DB_PORT),
+            username: process.env.DB_USERNAME,
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_DATABASE,
+          },
         },
-      },
-      autoLoadModels: true,
-      // DO NOT use synchronize in production - otherwise you risk data loss
-      synchronize: true,
-      sync: {
-        force: true,
-      },
-      define: {
-        underscored: true,
-      },
+        autoLoadModels: true,
+        // DO NOT use synchronize in production - otherwise you risk data loss
+        synchronize: true,
+        sync: {
+          force: true,
+        },
+        define: {
+          underscored: true,
+        },
+        logging: (msg) => pinoLogger.debug(msg),
+      }),
     }),
     RedisModule.forRoot({
       type: 'single',
@@ -86,6 +91,9 @@ import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
         },
         redact: {
           paths: ['req.headers.authorization', 'req.headers.cookie'],
+        },
+        formatters: {
+          level: (label) => ({ level: label }),
         },
       },
       exclude: [
