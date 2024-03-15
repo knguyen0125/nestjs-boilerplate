@@ -8,10 +8,45 @@ export class Pbkdf2Hasher
   override id: string;
 
   constructor(
-    private readonly algorithm: string = 'sha256',
-    private readonly iterations: number = 600_000,
-    private readonly keyLength: number = 64,
-    private readonly saltLength: number = 16,
+    /**
+     * PBKDF2 Algorithm.
+     *
+     * Available choices includes:
+     *
+     * * sha1 - not recommended because of insecurity
+     * * sha256 (default)
+     * * sha512
+     *
+     * @default sha256
+     */
+    readonly algorithm: string = 'sha256',
+    /**
+     * Number of iterations.
+     *
+     * OWASP recommends
+     * * 1_300_000 for SHA1
+     * * 600_000 for SHA256
+     * * 210_000 for SHA512
+     *
+     * @default 600000
+     */
+    readonly iterations: number = 600_000,
+    /**
+     * Derived Key Length in bytes.
+     *
+     * Should be no more than maximum output of algorithm:
+     *
+     * * 20 for SHA1
+     * * 32 for SHA256
+     * * 64 for SHA512
+     *
+     * @default 32
+     */
+    readonly keyLength: number = 32,
+    /**
+     * Salt length in byte
+     */
+    readonly saltLength: number = 16,
   ) {
     super();
     this.id = `pbkdf2-${algorithm}`;

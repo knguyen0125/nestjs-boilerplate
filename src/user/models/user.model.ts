@@ -1,6 +1,6 @@
 import { Table, Model, Column, BeforeSave } from 'sequelize-typescript';
 import { v4 } from 'uuid';
-import { defaultHasher } from '@/user/utils/hashers';
+import { defaultHasher } from '@/user/utils/password-hashers';
 
 @Table
 export class User extends Model {
