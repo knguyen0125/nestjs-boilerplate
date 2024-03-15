@@ -1,4 +1,4 @@
-import { Table, Model, Column, BeforeSave } from 'sequelize-typescript';
+import { Table, Model, Column, BeforeSave, Index } from 'sequelize-typescript';
 import { v4 } from 'uuid';
 import { defaultHasher } from '@/user/utils/password-hashers';
 import { pinoLogger } from '@/utils/pino';
@@ -11,6 +11,7 @@ export class User extends Model {
   })
   override id: string;
 
+  @Index
   @Column({
     allowNull: false,
     unique: true,
