@@ -35,6 +35,14 @@ services:
       <<: *nestjs-env
       WORKER_MODE: 'true'
 
+  scheduler:
+    <<: *nestjs
+    ports: []
+    environment:
+      <<: *nestjs-env
+      WORKER_MODE: 'false'
+      ENABLE_TASK_SCHEDULER: 'true'
+
   postgres:
     image: public.ecr.aws/docker/library/postgres:16.2
     environment:

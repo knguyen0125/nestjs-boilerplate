@@ -9,9 +9,12 @@ import { UserModule } from './user/user.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
 import { logger, pinoHttp } from '@/utils/logger';
+import { ConditionalModule, ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ConfigModule.forRoot(),
     SequelizeModule.forRoot({
       dialect: 'postgres',
       replication: {
@@ -87,6 +90,12 @@ import { logger, pinoHttp } from '@/utils/logger';
     HealthModule,
     NotificationModule,
     UserModule,
+    // Register the ScheduleModule only if the ENABLE_TASK_SCHEDULING environment variable is set
+    // To make sure that we don't have multiple instances of the scheduler running
+    ConditionalModule.registerWhen(
+      ScheduleModule.forRoot(),
+      (env) => env['ENABLE_TASK_SCHEDULER'] === 'true',
+    ),
   ],
   providers: [
     {
