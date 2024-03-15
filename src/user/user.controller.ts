@@ -6,11 +6,13 @@ import {
   Post,
   UnauthorizedException,
   Logger,
+  Req,
 } from '@nestjs/common';
 import { User } from '@/user/models/user.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { defaultHasher } from '@/user/utils/password-hashers';
 import { Op } from 'sequelize';
+import { Request } from 'express';
 
 class UserDto {
   email: string;
@@ -67,5 +69,17 @@ export class UserController {
       throw new UnauthorizedException('Invalid email or password');
     }
     return { message: 'Welcome' };
+  }
+
+  @Get('sess-set')
+  async sessSet(@Req() req: Request) {
+    // @ts-ignore
+    req.session.test = req.session.test ? req.session.test + 1 : 1;
+  }
+
+  @Get('sess-get')
+  async sessGet(@Req() req: Request) {
+    // @ts-ignore
+    return req.session;
   }
 }
