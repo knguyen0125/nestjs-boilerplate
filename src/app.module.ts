@@ -12,48 +12,46 @@ import { logger, pinoHttp } from '@/utils/logger';
 
 @Module({
   imports: [
-    SequelizeModule.forRootAsync({
-      useFactory: () => ({
-        dialect: 'postgres',
-        replication: {
-          read: process.env.DB_READ_REPLICA_HOST
-            ? [
-                {
-                  host: process.env.DB_READ_REPLICA_HOST,
-                  port: parseInt(process.env.DB_PORT),
-                  username: process.env.DB_USERNAME,
-                  password: process.env.DB_PASSWORD,
-                  database: process.env.DB_DATABASE,
-                },
-              ]
-            : [
-                {
-                  host: process.env.DB_HOST,
-                  port: parseInt(process.env.DB_PORT),
-                  username: process.env.DB_USERNAME,
-                  password: process.env.DB_PASSWORD,
-                  database: process.env.DB_DATABASE,
-                },
-              ],
-          write: {
-            host: process.env.DB_HOST,
-            port: parseInt(process.env.DB_PORT),
-            username: process.env.DB_USERNAME,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_DATABASE,
-          },
+    SequelizeModule.forRoot({
+      dialect: 'postgres',
+      replication: {
+        read: process.env.DB_READ_REPLICA_HOST
+          ? [
+              {
+                host: process.env.DB_READ_REPLICA_HOST,
+                port: parseInt(process.env.DB_PORT),
+                username: process.env.DB_USERNAME,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_DATABASE,
+              },
+            ]
+          : [
+              {
+                host: process.env.DB_HOST,
+                port: parseInt(process.env.DB_PORT),
+                username: process.env.DB_USERNAME,
+                password: process.env.DB_PASSWORD,
+                database: process.env.DB_DATABASE,
+              },
+            ],
+        write: {
+          host: process.env.DB_HOST,
+          port: parseInt(process.env.DB_PORT),
+          username: process.env.DB_USERNAME,
+          password: process.env.DB_PASSWORD,
+          database: process.env.DB_DATABASE,
         },
-        autoLoadModels: true,
-        // DO NOT use synchronize in production - otherwise you risk data loss
-        synchronize: true,
-        sync: {
-          // force: true,
-        },
-        define: {
-          underscored: true,
-        },
-        logging: (msg) => logger.debug(msg),
-      }),
+      },
+      autoLoadModels: true,
+      // DO NOT use synchronize in production - otherwise you risk data loss
+      synchronize: true,
+      sync: {
+        // force: true,
+      },
+      define: {
+        underscored: true,
+      },
+      logging: (msg) => logger.debug(msg),
     }),
     RedisModule.forRoot({
       type: 'single',

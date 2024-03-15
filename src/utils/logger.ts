@@ -62,6 +62,8 @@ export const pinoHttp = {
   },
 };
 
+// Using this logger instance allow us to hook into the logger async local storage,
+// which is useful for logging outside NestJS injection
 export const logger = new Logger(
   new PinoLogger({
     pinoHttp,
