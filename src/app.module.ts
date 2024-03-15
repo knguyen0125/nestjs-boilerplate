@@ -88,6 +88,7 @@ import { SequelizeErrorInterceptor } from '@/utils/sequelize-error.interceptor';
           minLength: 4096,
           sync: false,
         }),
+        level: process.env.LOG_LEVEL || 'info',
         genReqId: function (req, res) {
           const existingID = req.id ?? req.headers['x-request-id'];
           if (existingID) return existingID;
