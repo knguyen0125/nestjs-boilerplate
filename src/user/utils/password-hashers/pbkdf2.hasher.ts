@@ -86,7 +86,7 @@ export class Pbkdf2Hasher
     };
   }
 
-  override async hash(
+  override async encode(
     plaintext: string,
     salt: string = crypto.randomBytes(this.saltLength).toString('hex'),
     iterations: number = this.iterations,
@@ -104,7 +104,7 @@ export class Pbkdf2Hasher
     return this.formatHash(salt, hash);
   }
 
-  override async compare(plaintext: string, hash: string) {
+  override async verify(plaintext: string, hash: string) {
     const { salt, keyLength, originalHash, iterations, algorithm } =
       this.parseHash(hash);
 
@@ -132,7 +132,7 @@ export class Pbkdf2Hasher
     const extraIterations = this.iterations - iterations;
 
     if (extraIterations > 0) {
-      await this.hash(plaintext, salt, extraIterations, keyLength, algorithm);
+      await this.encode(plaintext, salt, extraIterations, keyLength, algorithm);
     }
   }
 }

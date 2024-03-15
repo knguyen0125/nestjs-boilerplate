@@ -11,11 +11,11 @@ export class BcryptHasher
     super();
   }
 
-  override async hash(plaintext: string, rounds: number = this.rounds) {
+  override async encode(plaintext: string, rounds: number = this.rounds) {
     return await bcrypt.hash(plaintext, rounds);
   }
 
-  override async compare(plaintext: string, hash: string) {
+  override async verify(plaintext: string, hash: string) {
     return await bcrypt.compare(plaintext, hash);
   }
 
@@ -27,7 +27,7 @@ export class BcryptHasher
     const extraIterations = this.rounds - bcrypt.getRounds(hash);
 
     if (extraIterations > 0) {
-      await this.hash(plaintext, extraIterations);
+      await this.encode(plaintext, extraIterations);
     }
   }
 }

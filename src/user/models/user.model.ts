@@ -47,7 +47,7 @@ export class User extends Model {
         throw new Error('Password must be between 8 and 64 characters long');
       }
 
-      instance.password = await defaultHasher.hash(instance.password);
+      instance.password = await defaultHasher.encode(instance.password);
     }
   }
 

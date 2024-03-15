@@ -21,7 +21,7 @@ export class Argon2Hasher
     };
   }
 
-  override async hash(plaintext: string) {
+  override async encode(plaintext: string) {
     return await argon2.hash(plaintext, {
       type: argon2.argon2id,
       // OWASP recommendation: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html#argon2id
@@ -29,7 +29,7 @@ export class Argon2Hasher
     });
   }
 
-  override async compare(plaintext: string, hash: string) {
+  override async verify(plaintext: string, hash: string) {
     return await argon2.verify(hash, plaintext);
   }
 

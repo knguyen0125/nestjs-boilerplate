@@ -10,12 +10,12 @@ export class DelegatingHasher
     super();
   }
 
-  override async hash(plaintext: string) {
-    const computed = await this.enabledHashers[0].hash(plaintext);
+  override async encode(plaintext: string) {
+    const computed = await this.enabledHashers[0].encode(plaintext);
     return `{${this.enabledHashers[0].id}}${computed}`;
   }
 
-  override async compare(plaintext: string, hash: string) {
+  override async verify(plaintext: string, hash: string) {
     const hasher = this.enabledHashers.find((h) =>
       hash.startsWith(`{${h.id}}`),
     );
@@ -23,7 +23,7 @@ export class DelegatingHasher
       throw new Error('Unknown hasher');
     }
 
-    return hasher.compare(plaintext, hash.slice(`{${hasher.id}}`.length));
+    return hasher.verify(plaintext, hash.slice(`{${hasher.id}}`.length));
   }
 
   override async needsUpgrade(hash: string) {

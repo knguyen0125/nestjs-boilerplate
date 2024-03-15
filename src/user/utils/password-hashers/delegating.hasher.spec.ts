@@ -17,43 +17,43 @@ describe('#hash', () => {
   });
 
   it('should hash the plaintext', async () => {
-    expect(await delegatingHasher.hash('password')).not.toEqual('password');
+    expect(await delegatingHasher.encode('password')).not.toEqual('password');
   });
 
   it('should return true if the plaintext matches the hash', async () => {
-    const hash = await delegatingHasher.hash('password');
-    expect(await delegatingHasher.compare('password', hash)).toBe(true);
+    const hash = await delegatingHasher.encode('password');
+    expect(await delegatingHasher.verify('password', hash)).toBe(true);
   });
 
   it('should return true if it receives a hash from a different hasher within its list of enabled hashers - argon2', async () => {
-    const hash = await argon2Hasher.hash('password');
+    const hash = await argon2Hasher.encode('password');
     expect(
-      await delegatingHasher.compare('password', `{${argon2Hasher.id}}${hash}`),
+      await delegatingHasher.verify('password', `{${argon2Hasher.id}}${hash}`),
     ).toBe(true);
   });
 
   it('should return true if it receives a hash from a different hasher within its list of enabled hashers - bcrypt', async () => {
-    const hash = await bcryptHasher.hash('password');
+    const hash = await bcryptHasher.encode('password');
     expect(
-      await delegatingHasher.compare('password', `{${bcryptHasher.id}}${hash}`),
+      await delegatingHasher.verify('password', `{${bcryptHasher.id}}${hash}`),
     ).toBe(true);
   });
 
   it('should return true if it receives a hash from a different hasher within its list of enabled hashers - pbkdf2-sha256', async () => {
-    const hash = await pbkd2Sha256Hasher.hash('password');
+    const hash = await pbkd2Sha256Hasher.encode('password');
     await expect(
-      delegatingHasher.compare('password', `{${pbkd2Sha256Hasher.id}}${hash}`),
+      delegatingHasher.verify('password', `{${pbkd2Sha256Hasher.id}}${hash}`),
     ).rejects.toThrow('Unknown hasher');
   });
 
   it('should return false if the plaintext does not match the hash', async () => {
-    const hash = await delegatingHasher.hash('password');
-    expect(await delegatingHasher.compare('wrong', hash)).toBe(false);
+    const hash = await delegatingHasher.encode('password');
+    expect(await delegatingHasher.verify('wrong', hash)).toBe(false);
   });
 
   it('should throw an error if the hash is from an unknown hasher', async () => {
     await expect(
-      delegatingHasher.compare('password', `{unknown}hash`),
+      delegatingHasher.verify('password', `{unknown}hash`),
     ).rejects.toThrow('Unknown hasher');
   });
 });
@@ -69,7 +69,7 @@ describe('#needsUpgrade', () => {
       bcryptHasher,
     ]);
 
-    const oldHash = await oldDelegatingHasher.hash('password');
+    const oldHash = await oldDelegatingHasher.encode('password');
     await expect(newDelegatingHasher.needsUpgrade(oldHash)).resolves.toBe(true);
   });
 
@@ -87,7 +87,7 @@ describe('#needsUpgrade', () => {
       bcryptHasher,
     ]);
 
-    const oldHash = await oldDelegatingHasher.hash('password');
+    const oldHash = await oldDelegatingHasher.encode('password');
     await expect(newDelegatingHasher.needsUpgrade(oldHash)).resolves.toBe(true);
   });
 
@@ -98,7 +98,7 @@ describe('#needsUpgrade', () => {
     const oldDelegatingHasher = new DelegatingHasher([bcryptHasher]);
     const newDelegatingHasher = new DelegatingHasher([newBcryptHasher]);
 
-    const oldHash = await oldDelegatingHasher.hash('password');
+    const oldHash = await oldDelegatingHasher.encode('password');
     await expect(newDelegatingHasher.needsUpgrade(oldHash)).resolves.toBe(
       false,
     );
